@@ -18,9 +18,9 @@ const server = async () => {
 
   app.use(cors())
   app.use(helmet())
+  app.use(compression())
   app.use(bodyParser.json({ limit: '50mb' }))
   app.use(bodyParser.urlencoded({ extended: true }))
-  app.use(compression())
 
   app.use((req, res) => {
     return res
@@ -29,7 +29,6 @@ const server = async () => {
   })
 
   app.use((error, req, res) => {
-    console.error(error)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error })
   })
 
