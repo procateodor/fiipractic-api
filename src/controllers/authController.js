@@ -1,5 +1,6 @@
 const HttpStatus = require('http-status-codes')
-const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
+const { createTkn } = require('../utils')
 
 exports.register = async (req, res) => {
   try {
@@ -10,15 +11,17 @@ exports.register = async (req, res) => {
         message: 'User already exists!'
       })
     }
+    req.body.password = bcrypt.hashSync(req.body.password, 10)
     const user = await req.db.User.create(req.body)
-    const token = jwt.sign({ _id: user._id }, 'my lil secret', { expiresIn: '7d' })
+    const token = createTkn({ _id: user._id }, process.env.JWT_KEY)
 
-    return res.status(HttpStatus.OK).json({
+    return res.status(HttpStatus.CREATED).json({
       success: true,
       message: 'Successfully register',
       token
     })
   } catch (error) {
+    console.error(error)
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: 'Something bad happened!'
@@ -36,14 +39,14 @@ exports.login = async (req, res) => {
       })
     }
 
-    if (req.body.password !== user.password) {
+    if (!bcrypt.compareSync(req.body.password, user.password)) {
       return res.status(HttpStatus.UNAUTHORIZED).json({
         success: false,
         message: 'Incorrect password!'
       })
     }
 
-    const token = jwt.sign({ _id: user._id }, 'my lil secret', { expiresIn: '7d' })
+    const token = createTkn({ _id: user._id }, process.env.JWT_KEY)
 
     return res.status(HttpStatus.OK).json({
       success: true,
