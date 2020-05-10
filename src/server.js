@@ -4,8 +4,9 @@ const cors = require('cors')
 const compression = require('compression')
 const HttpStatus = require('http-status-codes')
 const helmet = require('helmet')
-
+const db = require('./models')
 const mongoose = require('mongoose')
+const router = require('./routes')
 
 const server = async () => {
   const app = express()
@@ -15,12 +16,16 @@ const server = async () => {
     useUnifiedTopology: true,
     useCreateIndex: true
   })
-
   app.use(cors())
   app.use(helmet())
   app.use(compression())
   app.use(bodyParser.json({ limit: '50mb' }))
   app.use(bodyParser.urlencoded({ extended: true }))
+  app.use((req, res, next) => {
+    req.db = db
+    next()
+  })
+  app.use('/', router)
 
   app.use((req, res) => {
     return res
