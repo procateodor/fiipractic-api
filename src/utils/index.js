@@ -1,4 +1,7 @@
 const jwt = require('jsonwebtoken')
+const constants = require('./constants')
+
+exports.constants = constants
 
 exports.createTkn = (payload = {}, secret) => {
   payload['user:id'] = payload._id || null

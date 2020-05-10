@@ -1,6 +1,7 @@
 const HttpStatus = require('http-status-codes')
 const bcrypt = require('bcrypt')
-const { createTkn } = require('../utils')
+const { createTkn, constants } = require('../utils')
+const { saltRounds } = constants
 
 exports.register = async (req, res) => {
   try {
@@ -11,7 +12,7 @@ exports.register = async (req, res) => {
         message: 'User already exists!'
       })
     }
-    req.body.password = bcrypt.hashSync(req.body.password, 10)
+    req.body.password = bcrypt.hashSync(req.body.password, saltRounds)
     const user = await req.db.User.create(req.body)
     const token = createTkn({ _id: user._id }, process.env.JWT_KEY)
 
